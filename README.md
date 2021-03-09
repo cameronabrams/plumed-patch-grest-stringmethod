@@ -1,5 +1,5 @@
 # PLUMED patch for gREST-enabled TAMD and String Method in Gromacs
-TAMD is enhanced sampling method to explore free energy landscape. On the other hand, the string method has to ability to minimum free energy paths connecting landmarks on the free energy surface. 
+TAMD is an enhanced sampling method to explore free energy landscape. On the other hand, the string method has the ability to find minimum free energy paths connecting landmarks on the free energy surface. 
 
 The aim of this project is to implement TAMD/SM in PLUMED+GROMACS. The method also supports the implementation of solute tempering methods such as REST2, and gREST.  
 Please cite the following article if using this code:
