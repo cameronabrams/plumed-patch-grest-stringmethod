@@ -1,0 +1,72 @@
+diff -Naur src-orig/gromacs/mdrun/legacymdrunoptions.h src/gromacs/mdrun/legacymdrunoptions.h
+--- src-orig/gromacs/mdrun/legacymdrunoptions.h	2021-01-23 08:41:36.498564469 -0500
++++ src/gromacs/mdrun/legacymdrunoptions.h	2021-01-23 09:30:58.676333656 -0500
+@@ -174,7 +174,7 @@
+ 
+         ImdOptions       &imdOptions = mdrunOptions.imdOptions;
+ 
+-        t_pargs           pa[49] = {
++        t_pargs           pa[50] = {
+ 
+             { "-dd",      FALSE, etRVEC, {&realddxyz},
+               "Domain decomposition grid, 0 is optimize" },
+@@ -261,6 +261,8 @@
+               "Number of random exchanges to carry out each exchange interval (N^3 is one suggestion).  -nex zero or not specified gives neighbor replica exchange." },
+             { "-reseed",  FALSE, etINT, {&replExParams.randomSeed},
+               "Seed for replica exchange, -1 is generate a seed" },
++            { "-nimg",  FALSE, etINT, {&replExParams.numImages},/* PLUMED RESM */
++              "Number of images for string method." },
+             { "-hrex",  FALSE, etBOOL, {&plumed_hrex}, /* PLUMED HREX */
+               "Enable hamiltonian replica exchange" },
+             { "-imdport",    FALSE, etINT, {&imdOptions.port},
+diff -Naur src-orig/gromacs/mdrun/replicaexchange.cpp src/gromacs/mdrun/replicaexchange.cpp
+--- src-orig/gromacs/mdrun/replicaexchange.cpp	2021-01-23 08:41:36.498564469 -0500
++++ src/gromacs/mdrun/replicaexchange.cpp	2021-01-23 09:32:09.742763513 -0500
+@@ -159,6 +159,7 @@
+     real  *beta;
+     real  *Vol;
+     real **de;
++    int    nimg;  /* PLUMED RESM */
+     //! \}
+ };
+ 
+@@ -491,6 +492,10 @@
+         snew(re->de[i], re->nrepl);
+     }
+     re->nex = replExParams.numExchanges;
++    /* PLUMED RESM */
++    re->nimg = replExParams.numImages;
++    if ( re->nimg > 200) re->nimg=re->nrepl;
++    /* END PLUMED RESM */
+     return re;
+ }
+ 
+@@ -1075,9 +1080,14 @@
+         {
+             a = re->ind[i-1];
+             b = re->ind[i];
++            /* PLUMED RESM*/
++            int img1=a/re->nimg;
++            int img2=b/re->nimg;
++
+ 
+             bPrint = (re->repl == a || re->repl == b);
+-            if (i % 2 == m)
++            if (i % 2 == m && img1 == img2)
++            /* END PLUMED RESM */
+             {
+                 delta = calc_delta(fplog, bPrint, re, a, b, a, b);
+                 /* PLUMED */
+diff -Naur src-orig/gromacs/mdrun/replicaexchange.h src/gromacs/mdrun/replicaexchange.h
+--- src-orig/gromacs/mdrun/replicaexchange.h	2021-01-23 08:41:36.498564469 -0500
++++ src/gromacs/mdrun/replicaexchange.h	2021-01-23 09:31:57.454343356 -0500
+@@ -67,6 +67,9 @@
+     int numExchanges = 0;
+     //! The random seed, -1 means generate a seed.
+     int randomSeed = -1;
++    /* PLUMED RESM */
++    int numImages=100000;        /* The number of images for string method with plumed */
++    /* END PLUMED RESM */
+ };
+ 
+ //! Abstract type for replica exchange
