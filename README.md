@@ -20,22 +20,39 @@ With succesfull installation, the programs are now ready to launch string method
 The following input is used for SM calculation in 2D dihedral CV space
 
 **#Plumed input file:**
+
 MFEP ...
+
 NIMAGES=8                    # Number of Images
+
 LABEL=mfep                   # label for code section
+
 ARG=torsion1,torsion2        # Collective varibles 
+
 FICT=0.0,0.0                 # Provide inital value for CV, with 0 it will pick the CV values directly from simulation.
+
 KAPPA=100,100                # Force constant
+
 GAMMABAR=100                 # Friction parameter; with gammabar=0, mean force calculations can be achieved
+
 INTERVAL=200                 # Steps for force accumulation
+
 INTERPOLATION=LINEAR         # Interpolation scheme, use TAMD for TAMD calculations
+
 FREQ=1                       # Frequency for dumping the data
+
 TEMP=0.0                     # Temperature for finite tempeature string/TAMD
+
 FICT_MAX=3.1415,3.1415       # Upper CV boundaries
+
 FICT_MIN=-3.1415,-3.1415     # Lower CV boundaries
+
 ATINDCV=1,2,3,4,2,3,4,5      # Local index assigned to atoms/groups/centers in CV
+
 MCENTER=1,1,1,1,1,1,1,1      # Mass for each center
+
 EVOLVE_ENDS=11               # Evolve both ends=11, first end=10, last end=01, Fix the end=00 
+
 ... MFEP
 
 
