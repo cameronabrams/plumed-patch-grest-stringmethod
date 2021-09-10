@@ -61,6 +61,7 @@ class MFEP : public Bias {
   std::vector<double> fict_max; ///< input parameter, maximum of each fictitous dynamical variable.
   std::vector<double> fict_min; ///< input parameter, minimum of each fictitous dynamical variable.
   std::vector<double> fict;    ///< current values of each fictitous dynamical variable.
+  std::vector<vector<double>> fict_trans; /// will be used to transfer fict values from master
   std::vector<double> ffict;    ///< current force of each fictitous dynamical variable.
   std::vector<double> fict_ave; ///< averaged values of each collective variable.
   std::vector<Value*>  fictValue; ///< pointers to fictitious dynamical variables
@@ -395,6 +396,7 @@ void MFEP::calculate() {
     writeInitialLog ();
     //initialize CV setup, MT setup, allocate memory for fictitious variables
     stringSetup ();
+    for (int i=0;i<nimg;i++) fict_trans.push_back(fict);
   } // firsttime
 
   double ene=0.0;
@@ -643,19 +645,19 @@ void MFEP::transferDataFromMaster () {
 // Here, we are copying the reparametized center (1) and setting the z values on zeroth image to zfict, so that we can send these value to replica of zeroth image (2). (2) is only appliable in the case of replica exchange simulations
     for(int j=0; j<nz; ++j) {
       fict[j]=z[0][j];      // (1)
-      zfict[j]=z[0][j];     // (2)
+      fict_trans[0][j]=z[0][j];     // (2)
     }
 // Here, we are simply setting the same z value for all the replicas for zeroth image
     for(int j=1; j<repperimg; ++j) {
-      multi_sim_comm.Isend(zfict,j,0);
+      multi_sim_comm.Isend(fict_trans[0],j,0);
     }
 // applying same procedure for other images
     for(int i=1; i<ni; ++i) {
       for(int j=0; j<nz; ++j) {
-        zfict[j]=z[i][j];
+	 fict_trans[i][j]=z[i][j];
       }
       for(int j=(i)*repperimg; j<(i+1)*repperimg; ++j) {
-        multi_sim_comm.Isend(zfict,j,0);
+        multi_sim_comm.Isend(fict_trans[i],j,0);
       }
     }
     }else{
